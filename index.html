@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feliz Día del Novio 💕</title>
+  <style>
+    /* Layout base - uso flex para centrar y reservado espacio inferior para el botón */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 120px 20px; /* espacio inferior reservado para el botón */
+      box-sizing: border-box;
+      font-family: 'Georgia', serif;
+      color: #fff;
+      background: url('https://raw.githubusercontent.com/minervamanuel2912-lang/M-sica-y-foto/3060cd4f91df5cf89be86c22256891625a7dfd88/file_000000002678622faa8bf43ce524ad01.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    /* Contenedor general (centra y limita alto para pantallas pequeñas) */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      max-height: calc(100vh - 160px); /* evita que el contenedor quede bajo el botón */
+      overflow: auto; /* si el contenido es grande, se hace scroll */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    /* DIV del texto (tu "div" con fondo negro translúcido, borde y sombra rosada) */
+    .text-box {
+      width: 100%;
+      background: rgba(0,0,0,0.25); /* negro casi transparente */
+      border-radius: 22px;
+      padding: 34px;
+      border: 2px solid rgba(255,182,193,0.75); /* borde rosado suave */
+      box-shadow: 0 10px 30px rgba(255,105,180,0.35); /* sombra rosada */
+      color: #fff;
+      backdrop-filter: blur(1px);
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 2rem;
+      color: #ffb6c1;
+      font-style: italic;
+      text-shadow: 0 0 10px #ff69b4;
+    }
+
+    p {
+      margin: 0 0 12px 0;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #fafafa;
+    }
+
+    /* Canvas (detrás de todo) */
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none; /* clics van a la página, no al canvas */
+    }
+
+    /* Botón abajo-centro */
+    #playBtn {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      z-index: 3;
+      padding: 12px 22px;
+      font-size: 16px;
+      background: rgba(255, 105, 180, 0.1);
+      color: white;
+      border: black;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255,105,180,0.2);
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    #playBtn:hover { transform: translateX(-50%) scale(1.06); background: rgba(255,80,150,0.98); }
+
+    /* Pequeñas mejoras responsive */
+    @media (max-width: 420px) {
+      .text-box { padding: 22px; }
+      h1 { font-size: 1.6rem; }
+      p { font-size: 1rem; }
+      #playBtn { padding: 10px 16px; font-size: 15px; bottom: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón abajo-centro (se oculta al darle click, como tenías) -->
+  <button id="playBtn">🎵 Haz click aquí mi amor</button>
+
+  <!-- Contenedor y DIV del texto (recuperé el div que pediste) -->
+  <div class="container">
+    <div class="text-box">
+      <h1>💖 Feliz Día del Novio 💖</h1>
+      <p>
+        Hoy quiero recordarte lo afortunada que me siento de tenerte en mi vida. 
+        Eres mucho más que mi pareja: eres mi mejor amigo, mi apoyo, mi confidente 
+        y la razón de muchas de mis sonrisas. Gracias por cada detalle, por tu paciencia, 
+        por abrazarme cuando más lo necesito y por quedarte a mi lado incluso en los momentos difíciles.
+      </p>
+      <p>
+        Contigo aprendí que el amor se construye con pequeños gestos, con miradas que dicen más que mil palabras 
+        y con la certeza de que, pase lo que pase, siempre podremos contar el uno con el otro. 
+        Te amo con todo lo que soy y con todo lo que seré. Gracias por ser mi persona especial, 
+        mi refugio y mi felicidad. 💕✨
+      </p>
+    </div>
+  </div>
+
+  <canvas id="hearts"></canvas>
+
+  <script>
+    // Audio (se reproduce al click del botón)
+    const audio = new Audio("https://raw.githubusercontent.com/minervamanuel2912-lang/M-sica-y-foto/3060cd4f91df5cf89be86c22256891625a7dfd88/Suki%20Waterhouse%20-%20Good%20looking%20__%20Subtitulado%20espa%C3%B1ol%20-%20Bozhanick.mp3");
+    audio.loop = true;
+
+    const playBtn = document.getElementById('playBtn');
+    playBtn.addEventListener('click', () => {
+      audio.play().catch(()=>{/* algunos navegadores requieren interacción, ya la hay */});
+      playBtn.style.display = 'none'; // comportamiento que ya tenías
+    });
+
+    /* Canvas corazones detrás */
+    const canvas = document.getElementById('hearts');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Heart {
+      constructor(x,y,size=Math.random()*20+10, explosion=false, angle=0, speedX=0){
+        this.x = x || Math.random()*canvas.width;
+        this.y = y || canvas.height + 20;
+        this.size = size;
+        this.color = `rgba(255,105,180,${Math.random()*0.7+0.25})`;
+        this.speedY = explosion ? Math.random()*2 + 1 : Math.random()*1.4 + 0.6;
+        this.speedX = speedX;
+        this.alpha = 1;
+        this.explosion = explosion;
+        this.angle = angle;
+      }
+      draw(){
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.bezierCurveTo(this.x - this.size/2, this.y - this.size/2,
+                          this.x - this.size, this.y + this.size/3,
+                          this.x, this.y + this.size);
+        ctx.bezierCurveTo(this.x + this.size, this.y + this.size/3,
+                          this.x + this.size/2, this.y - this.size/2,
+                          this.x, this.y);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+      }
+      update(){
+        if(this.explosion){
+          this.x += Math.cos(this.angle)*this.speedX;
+          this.y += Math.sin(this.angle)*this.speedY;
+          this.size += 0.12;
+          this.alpha -= 0.01;
+        } else {
+          this.y -= this.speedY;
+        }
+        return !(this.y < -this.size || this.alpha <= 0 || this.x < -this.size || this.x > canvas.width + this.size);
+      }
+    }
+
+    const hearts = [];
+    setInterval(()=> hearts.push(new Heart(Math.random()*canvas.width, canvas.height + 20)), 300);
+
+    function animate(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(let i=hearts.length-1;i>=0;i--){
+        if(!hearts[i].update()) hearts.splice(i,1);
+        else hearts[i].draw();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    function addExplosion(x,y){
+      const count = 12;
+      for(let i=0;i<count;i++){
+        const angle = Math.random()*2*Math.PI;
+        const speedX = Math.random()*3 + 1;
+        hearts.push(new Heart(x,y,Math.random()*15+5,true,angle,speedX));
+      }
+    }
+
+    // click/touch para explotar corazones (funciona en todo el documento)
+    document.addEventListener('click', e => addExplosion(e.clientX, e.clientY));
+    document.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      addExplosion(t.clientX, t.clientY);
+    });
+  </script>
+</body>
+</html>
